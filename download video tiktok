@@ -1,0 +1,78 @@
+<?php
+// @SeroBots - @Yoroov //
+ob_start();
+$token = "7826802246:AAFDrmz-eLXbKgng3SOBp9d99Cx-6FW6w5Q";
+define('@DriBenbot', $token);
+function bot($method,$datas=[]){
+    $url = "https://api.telegram.org/bot".API_KEY."/"
+     .$method;
+$ch = curl_init();
+    curl_setopt($ch,CURLOPT_URL,$url);
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+    curl_setopt($ch,CURLOPT_POSTFIELDS,$datas);
+    $res = curl_exec($ch);
+    if(curl_error($ch)){
+        var_dump(curl_error($ch));
+    }else{
+        return json_decode($res);
+    }
+}
+function tik($SeroBots){
+header("Content-Type: application/json; charset=utf-8");
+error_reporting(0);
+$hmo = array(
+'origin: https://lovetik.com',
+'referer: https://lovetik.com/',
+'user-agent: Mozilla/5.0 (Linux; Android 11; SAMSUNG SM-A105F) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/18.0 Chrome/99.0.4844.88 Mobile Safari/537.36',
+'cookie: _ga_30X9VRGZQ4=GS1.1.1662950739.1.0.1662950739.0.0.0',
+);
+$curl = curl_init();
+ $config = array(
+ CURLOPT_URL => "https://lovetik.com/api/ajax/search",
+ CURLOPT_POST => true,
+ CURLOPT_RETURNTRANSFER => true,
+ CURLOPT_HTTPHEADER => $hmo,
+ CURLOPT_POSTFIELDS => array(
+ 'query'=>$SeroBots
+ )
+ );
+ curl_setopt_array($curl, $config);
+ $response = curl_exec($curl);
+ curl_close($curl);
+$json = json_decode($response);
+return $json;
+}
+if($text == "/start"){
+	bot("sendmessage",[
+	"chat_id"=>$chat_id,
+	"text"=>"اهلا عزيزي في بوت تحميل من تيك توك .\n\nقم بأرسل الرابط ليتم تحميل",
+	"reply_markup"=>json_encode(["inline_keyboard"=>[[['text'=>'المطور' ,'url'=>"https://t.me/Yoroov"]]]])
+	]);
+}
+if(preg_match("#tik#",$text)){
+	$api = tik($text);
+	$url1 = $api->links[0]->a;
+	file_put_contents($from_id.".mp4",file_get_contents($url1));
+	bot("sendvideo",[
+	"chat_id"=>$chat_id,
+	"video"=>new CURLFile($from_id.".mp4"),
+	"caption"=>"العنوان : ".$api->desc."\nمعرف الشخص : ".$api->author."\nاسم الشخص : ".$api->author_name."\n نوع الفيديو : بدون علامة ."
+	]);
+	$url2 = $api->links[3]->a;
+	file_put_contents($from_id.".mp4",file_get_contents($url2));
+	bot("sendvideo",[
+	"chat_id"=>$chat_id,
+	"video"=>new CURLFile($from_id.".mp4"),
+	"caption"=>"العنوان : ".$api->desc."\nمعرف الشخص : ".$api->author."\nاسم الشخص : ".$api->author_name."\n نوع الفيديو : مع علامه"
+	]);
+	$url3 = $api->links[0]->a;
+	file_put_contents($from_id.".mp3",file_get_contents($url3));
+	bot("sendaudio",[
+	"chat_id"=>$chat_id,
+	"audio"=>new CURLFile($from_id.".mp3"),
+	"caption"=>"العنوان : ".$api->desc."\nمعرف الشخص : ".$api->author."\nاسم الشخص : ".$api->author_name."\n نوع : mp3"
+	]);
+	unlike(from_id.".mp4");
+	unlike(from_id.".mp3");
+}
+?>
